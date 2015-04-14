@@ -43,9 +43,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HttpUtils.cs">
+    <Compile Include="DownloadedFile.cs" />
+    <Compile Include="GZipWebClient.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="HttpUtils.cs" />
     <Compile Include="ServiceBroker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

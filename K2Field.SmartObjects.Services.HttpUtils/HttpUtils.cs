@@ -21,8 +21,8 @@ namespace K2Field.SmartObjects.Services.HttpUtils
         [Attributes.Property("Url", SoType.Text, "Url", "Url")]
         public string Url { get; set; }
 
-        [Attributes.Property("Content Type", SoType.Text, "Content Type", "Content Type")]
-        public string ContentType { get; set; }
+        //[Attributes.Property("Content Type", SoType.Text, "Content Type", "Content Type")]
+        //public string ContentType { get; set; }
 
 
         [Attributes.Property("FileBase64", SoType.Memo, "File Base64", "File Base64")]
@@ -58,7 +58,7 @@ namespace K2Field.SmartObjects.Services.HttpUtils
         [Attributes.Method("DownloadFile", SourceCode.SmartObjects.Services.ServiceSDK.Types.MethodType.Read, "Download File", "Download File",
         new string[] { "Url" }, //required property array (no required properties for this sample)
         new string[] { "Url" }, //input property array (no optional input properties for this sample)
-        new string[] { "Url", "File", "FileName", "FileSize", "FileSizeFormatted", "FileExtension", "FileContentType", "FileBase64", "ResultStatus", "ResultMessage" })]
+        new string[] { "Url", "File", "FileName", "FileSize", "FileSizeFormatted", "FileExtension", "FileContentType", "ResultStatus", "ResultMessage" })]
         public HttpUtils DownloadFile()
         {
             //ServiceConfiguration["BingMapsKey"].ToString();
@@ -102,6 +102,32 @@ namespace K2Field.SmartObjects.Services.HttpUtils
 
             return this;
         }
+
+        [Attributes.Method("DownloadBase64File", SourceCode.SmartObjects.Services.ServiceSDK.Types.MethodType.Read, "Download Base64 File", "Download Base64 File",
+        new string[] { "Url" }, //required property array (no required properties for this sample)
+        new string[] { "Url" }, //input property array (no optional input properties for this sample)
+        new string[] { "Url", "File", "FilBase64", "FileSize", "FileSizeFormatted", "FileExtension", "FileContentType", "ResultStatus", "ResultMessage" })]
+        public HttpUtils DownloadBase64File()
+        {
+            //ServiceConfiguration["BingMapsKey"].ToString();
+
+            DownloadedFile File = null;
+            try
+            {
+                File = DownloadFile(this.Url);
+            }
+            catch (Exception ex)
+            {
+                this.ResultStatus = "Error";
+                this.ResultMessage = ex.Message;
+                return this;
+            }
+
+            MapFile(File);
+
+            return this;
+        }
+
 
         private void MapFile(DownloadedFile File)
         {
@@ -156,12 +182,11 @@ namespace K2Field.SmartObjects.Services.HttpUtils
         {
             GZipWebClient Client = new GZipWebClient();
 
-            if (!string.IsNullOrWhiteSpace(this.ContentType))
-            {
-                Client.Headers.Add("Accept", this.ContentType);
-            }
+            //if (!string.IsNullOrWhiteSpace(this.ContentType))
+            //{
+            //    Client.Headers.Add("Accept", this.ContentType);
+            //}
 
-            //                request.Expect = "100-continue";
             Client.Headers.Add("Accept-Encoding", "gzip, deflate");
 
             if (ServiceConfiguration.ServiceAuthentication.AuthenticationMode == AuthenticationMode.Impersonate || ServiceConfiguration.ServiceAuthentication.AuthenticationMode == AuthenticationMode.ServiceAccount)
@@ -199,12 +224,12 @@ namespace K2Field.SmartObjects.Services.HttpUtils
             HttpWebRequest request = null;
             request = (HttpWebRequest)WebRequest.Create(this.Url);
             request.Method = Method;
-            if(!string.IsNullOrWhiteSpace(this.ContentType))
-            {
-                request.Accept = this.ContentType;
-            }
+
+            //if(!string.IsNullOrWhiteSpace(this.ContentType))
+            //{
+            //    request.Accept = this.ContentType;
+            //}
             
-            //                request.Expect = "100-continue";
             request.Headers.Add("Accept-Encoding", "gzip, deflate");
 
             if (ServiceConfiguration.ServiceAuthentication.AuthenticationMode == AuthenticationMode.Impersonate || ServiceConfiguration.ServiceAuthentication.AuthenticationMode == AuthenticationMode.ServiceAccount)
@@ -343,25 +368,7 @@ namespace K2Field.SmartObjects.Services.HttpUtils
         }
     }
 
-    public class DownloadedFile
-    {
-        public string Base64 { get; set; }
-        public string FileExtension { get; set; }
-        public string FileName { get; set; }
-        public DateTime Downloaded { get; set; }
-        public string ContentType { get; set; }
-        public long Size { get; set; }
-        public string SizeFormatted { get; set; }
-        public WebHeaderCollection ResponseHeaders { get; set; }
-    }
 
-    public class GZipWebClient : WebClient
-    {
-        protected override WebRequest GetWebRequest(Uri address)
-        {
-            HttpWebRequest request = (HttpWebRequest)base.GetWebRequest(address);
-            request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-            return request;
-        }
-    }
+
+
 }
