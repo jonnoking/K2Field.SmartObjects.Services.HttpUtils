@@ -53,7 +53,7 @@ namespace K2Field.SmartObjects.Services.HttpUtils
         {
             //Service.ServiceConfiguration.Add("TwitterUsername", true, "");
 
-            Service.ServiceConfiguration.Add("BingMapsKey", true, "");
+            //Service.ServiceConfiguration.Add("BingMapsKey", true, "");
             //Service.ServiceConfiguration.Add(StringResources.SharePointURL, false, string.Empty);
             //Service.ServiceConfiguration.Add(StringResources.BindingName, false, string.Empty);
 

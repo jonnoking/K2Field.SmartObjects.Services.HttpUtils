@@ -37,8 +37,11 @@ namespace K2Field.SmartObjects.Services.HttpUtils
         [Attributes.Property("FileSize", SoType.Number, "File Size", "File Size")]
         public int FileSize { get; set; }
 
-        [Attributes.Property("FileFilename", SoType.Text, "File Name", "File Name")]
-        public string FileFilename { get; set; }
+        [Attributes.Property("FileSizeFormatted", SoType.Text, "File Size Formatted", "File Size Formatted")]
+        public string FileSizeFormatted { get; set; }
+
+        [Attributes.Property("FileName", SoType.Text, "File Name", "File Name")]
+        public string FileName { get; set; }
 
         [Attributes.Property("FileContentType", SoType.Text, "File Content Type", "File Content Type")]
         public string FileContentType { get; set; }
@@ -55,30 +58,24 @@ namespace K2Field.SmartObjects.Services.HttpUtils
         [Attributes.Method("DownloadFile", SourceCode.SmartObjects.Services.ServiceSDK.Types.MethodType.Read, "Download File", "Download File",
         new string[] { "Url" }, //required property array (no required properties for this sample)
         new string[] { "Url" }, //input property array (no optional input properties for this sample)
-        new string[] { "Url", "File", "FileSize", "FileExtension", "FileContentType", "FileBase64", "ResultStatus", "ResultMessage" })]
+        new string[] { "Url", "File", "FileName", "FileSize", "FileSizeFormatted", "FileExtension", "FileContentType", "FileBase64", "ResultStatus", "ResultMessage" })]
         public HttpUtils DownloadFile()
         {
             //ServiceConfiguration["BingMapsKey"].ToString();
 
-            DownloadedFile File = DownloadFile(this.Url);
-
-            if (string.IsNullOrWhiteSpace(File.FileName))
+            DownloadedFile File = null;
+            try
             {
-                File.FileName = Guid.NewGuid().ToString() + "." + File.FileExtension;
+                File = DownloadFile(this.Url);
+            }
+            catch (Exception ex)
+            {
+                this.ResultStatus = "Error";
+                this.ResultMessage = ex.Message;
+                return this;
             }
 
-            FileProperty fp = new FileProperty()
-            {
-                Content = File.Base64,
-                FileName = File.FileName
-            };
-
-            this.File = fp.Value.ToString();
-            this.ContentType = File.ContentType;
-            this.FileExtension = File.FileExtension;
-            this.FileBase64 = File.Base64;
-
-            this.ResultMessage = "OK";
+            MapFile(File);
 
             return this;
         }
@@ -86,34 +83,74 @@ namespace K2Field.SmartObjects.Services.HttpUtils
         [Attributes.Method("GetFileDetails", SourceCode.SmartObjects.Services.ServiceSDK.Types.MethodType.Read, "Get File Details", "Get File Details",
         new string[] { "Url" }, //required property array (no required properties for this sample)
         new string[] { "Url" }, //input property array (no optional input properties for this sample)
-        new string[] { "Url", "FileSize", "FileExtension", "FileContentType", "ResultStatus", "ResultMessage" })]
+        new string[] { "Url", "FileName", "FileSize", "FileSizeFormatted", "FileExtension", "FileContentType", "ResultStatus", "ResultMessage" })]
         public HttpUtils GetFileDetails()
         {
             //ServiceConfiguration["BingMapsKey"].ToString();
-
-            DownloadedFile File = HeadDownloadFile();
-
-            if (string.IsNullOrWhiteSpace(File.FileName))
+            DownloadedFile File = null;
+            try
             {
-                File.FileName = Guid.NewGuid().ToString() + "." + File.FileExtension;
+                File = HeadDownloadFile();
             }
-
-            FileProperty fp = new FileProperty()
+            catch (Exception ex)
             {
-                Content = File.Base64,
-                FileName = File.FileName
-            };
-
-            this.File = fp.Value.ToString();
-            this.ContentType = File.ContentType;
-            this.FileExtension = File.FileExtension;
-            this.FileBase64 = File.Base64;
-
-            this.ResultMessage = "OK";
+                this.ResultStatus = "Error";
+                this.ResultMessage = ex.Message;
+                return this;
+            }
+            MapFile(File);
 
             return this;
         }
 
+        private void MapFile(DownloadedFile File)
+        {
+            if (File != null)
+            {
+
+                if (string.IsNullOrWhiteSpace(File.ContentType) || !string.IsNullOrWhiteSpace(File.FileName))
+                {
+                    File.FileExtension = Path.GetExtension(File.FileName).Replace(".", "");
+                    this.FileExtension = File.FileExtension;                        
+                }
+
+                if (string.IsNullOrWhiteSpace(File.FileName))
+                {
+                    File.FileName = Guid.NewGuid().ToString();
+                    if (!string.IsNullOrWhiteSpace(File.FileExtension))
+                    {
+                        File.FileName += "." + File.FileExtension;
+                    }
+                    
+                }
+               
+                this.FileName = File.FileName;
+                
+                if (!string.IsNullOrWhiteSpace(File.Base64))
+                {
+                    FileProperty fp = new FileProperty()
+                    {
+                        Content = File.Base64,
+                        FileName = File.FileName
+                    };
+                
+                    this.File = fp.Value.ToString();
+                } 
+                
+                this.FileContentType = File.ContentType;
+                this.FileExtension = File.FileExtension;
+                this.FileSize = int.Parse(File.Size.ToString());
+                this.FileSizeFormatted = File.SizeFormatted;
+                this.FileBase64 = File.Base64;
+
+                this.ResultStatus = "OK";
+            }
+            else
+            {
+                this.ResultStatus = "Error";
+                this.ResultMessage = "No results";
+            }
+        }
         
         private GZipWebClient GetWebClient()
         {
@@ -215,11 +252,12 @@ namespace K2Field.SmartObjects.Services.HttpUtils
                 int ContentLength;
                 if(int.TryParse(response.Headers.Get("Content-Length"), out ContentLength))
                 {
-                    File.Size = response.ContentLength;
+                    File.Size = ContentLength;
                 }
-                File.ContentType = response.ContentType;
+                File.ContentType = response.Headers.Get("Content-Type");
                 File.FileExtension = GetDefaultExtension(File.ContentType).Replace(".", "");
                 File.FileName = Path.GetFileName(new Uri(request.RequestUri.ToString()).AbsolutePath);
+                File.SizeFormatted = BytesToString(File.Size);
             }
 
             request = null;
@@ -246,6 +284,7 @@ namespace K2Field.SmartObjects.Services.HttpUtils
                 File.Downloaded = DateTime.Now;
                 File.FileExtension = GetDefaultExtension(File.ContentType).Replace(".", "");
                 File.FileName = Path.GetFileName(new Uri(uri).AbsolutePath);
+                File.SizeFormatted = BytesToString(File.Size);
             }
             return File;
 
@@ -291,6 +330,17 @@ namespace K2Field.SmartObjects.Services.HttpUtils
 
             return result;
         }
+
+        static String BytesToString(long byteCount)
+        {
+            string[] suf = { "B", "KB", "MB", "GB", "TB", "PB", "EB" }; //Longs run out around EB
+            if (byteCount == 0)
+                return "0" + suf[0];
+            long bytes = Math.Abs(byteCount);
+            int place = Convert.ToInt32(Math.Floor(Math.Log(bytes, 1024)));
+            double num = Math.Round(bytes / Math.Pow(1024, place), 1);
+            return (Math.Sign(byteCount) * num).ToString() + suf[place];
+        }
     }
 
     public class DownloadedFile
@@ -301,7 +351,7 @@ namespace K2Field.SmartObjects.Services.HttpUtils
         public DateTime Downloaded { get; set; }
         public string ContentType { get; set; }
         public long Size { get; set; }
-        public string Host { get; set; }
+        public string SizeFormatted { get; set; }
         public WebHeaderCollection ResponseHeaders { get; set; }
     }
 
