@@ -24,6 +24,10 @@ namespace K2Field.SmartObjects.Services.HttpUtils
         //[Attributes.Property("Content Type", SoType.Text, "Content Type", "Content Type")]
         //public string ContentType { get; set; }
 
+        [Attributes.Property("InputFileName", SoType.Text, "File Name", "File Name")]
+        public string InputFileName { get; set; }
+
+
 
         [Attributes.Property("FileBase64", SoType.Memo, "File Base64", "File Base64")]
         public string FileBase64 { get; set; }
@@ -57,7 +61,7 @@ namespace K2Field.SmartObjects.Services.HttpUtils
 
         [Attributes.Method("DownloadFile", SourceCode.SmartObjects.Services.ServiceSDK.Types.MethodType.Read, "Download File", "Download File",
         new string[] { "Url" }, //required property array (no required properties for this sample)
-        new string[] { "Url" }, //input property array (no optional input properties for this sample)
+        new string[] { "Url", "InputFileName" }, //input property array (no optional input properties for this sample)
         new string[] { "Url", "File", "FileName", "FileSize", "FileSizeFormatted", "FileExtension", "FileContentType", "ResultStatus", "ResultMessage" })]
         public HttpUtils DownloadFile()
         {
@@ -106,7 +110,7 @@ namespace K2Field.SmartObjects.Services.HttpUtils
         [Attributes.Method("DownloadBase64File", SourceCode.SmartObjects.Services.ServiceSDK.Types.MethodType.Read, "Download Base64 File", "Download Base64 File",
         new string[] { "Url" }, //required property array (no required properties for this sample)
         new string[] { "Url" }, //input property array (no optional input properties for this sample)
-        new string[] { "Url", "File", "FilBase64", "FileSize", "FileSizeFormatted", "FileExtension", "FileContentType", "ResultStatus", "ResultMessage" })]
+        new string[] { "Url", "FilBase64", "FileSize", "FileSizeFormatted", "FileExtension", "FileContentType", "ResultStatus", "ResultMessage" })]
         public HttpUtils DownloadBase64File()
         {
             //ServiceConfiguration["BingMapsKey"].ToString();
@@ -152,12 +156,17 @@ namespace K2Field.SmartObjects.Services.HttpUtils
                
                 this.FileName = File.FileName;
                 
+                if (!string.IsNullOrWhiteSpace(this.InputFileName ))
+                {
+                    this.FileName = this.InputFileName;
+                }
+
                 if (!string.IsNullOrWhiteSpace(File.Base64))
                 {
                     FileProperty fp = new FileProperty()
                     {
                         Content = File.Base64,
-                        FileName = File.FileName
+                        FileName = this.FileName
                     };
                 
                     this.File = fp.Value.ToString();
