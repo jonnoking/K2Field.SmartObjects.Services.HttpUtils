@@ -91,7 +91,7 @@ namespace K2Field.SmartObjects.Services.HttpUtils
         {
             //ServiceConfiguration["BingMapsKey"].ToString();
 
-            DownloadedFile File = DownloadFile(this.Url);
+            DownloadedFile File = HeadDownloadFile();
 
             if (string.IsNullOrWhiteSpace(File.FileName))
             {
