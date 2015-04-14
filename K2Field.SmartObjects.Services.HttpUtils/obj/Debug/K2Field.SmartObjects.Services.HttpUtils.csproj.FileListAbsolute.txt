@@ -1,0 +1,5 @@
+C:\Development\K2Field.SmartObjects.Services.HttpUtils\K2Field.SmartObjects.Services.HttpUtils\bin\Debug\K2Field.SmartObjects.Services.HttpUtils.dll
+C:\Development\K2Field.SmartObjects.Services.HttpUtils\K2Field.SmartObjects.Services.HttpUtils\bin\Debug\K2Field.SmartObjects.Services.HttpUtils.pdb
+C:\Development\K2Field.SmartObjects.Services.HttpUtils\K2Field.SmartObjects.Services.HttpUtils\bin\Debug\SourceCode.SmartObjects.Services.ServiceSDK.dll
+C:\Development\K2Field.SmartObjects.Services.HttpUtils\K2Field.SmartObjects.Services.HttpUtils\obj\Debug\K2Field.SmartObjects.Services.HttpUtils.dll
+C:\Development\K2Field.SmartObjects.Services.HttpUtils\K2Field.SmartObjects.Services.HttpUtils\obj\Debug\K2Field.SmartObjects.Services.HttpUtils.pdb
