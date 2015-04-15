@@ -24,7 +24,7 @@ namespace K2Field.SmartObjects.Services.HttpUtils
         //[Attributes.Property("Content Type", SoType.Text, "Content Type", "Content Type")]
         //public string ContentType { get; set; }
 
-        [Attributes.Property("InputFileName", SoType.Text, "File Name", "File Name")]
+        [Attributes.Property("InputFileName", SoType.Text, "Input File Name", "Input File Name")]
         public string InputFileName { get; set; }
 
 
@@ -70,6 +70,10 @@ namespace K2Field.SmartObjects.Services.HttpUtils
             DownloadedFile File = null;
             try
             {
+                if (!string.IsNullOrWhiteSpace(ServiceConfiguration["BaseUrl"].ToString()) && !this.Url.StartsWith(ServiceConfiguration["BaseUrl"].ToString()))
+                {
+                    this.Url = ServiceConfiguration["BaseUrl"].ToString() + this.Url;
+                }
                 File = DownloadFile(this.Url);
             }
             catch (Exception ex)
@@ -110,7 +114,7 @@ namespace K2Field.SmartObjects.Services.HttpUtils
         [Attributes.Method("DownloadBase64File", SourceCode.SmartObjects.Services.ServiceSDK.Types.MethodType.Read, "Download Base64 File", "Download Base64 File",
         new string[] { "Url" }, //required property array (no required properties for this sample)
         new string[] { "Url" }, //input property array (no optional input properties for this sample)
-        new string[] { "Url", "FilBase64", "FileSize", "FileSizeFormatted", "FileExtension", "FileContentType", "ResultStatus", "ResultMessage" })]
+        new string[] { "Url", "FileBase64", "FileSize", "FileSizeFormatted", "FileExtension", "FileContentType", "ResultStatus", "ResultMessage" })]
         public HttpUtils DownloadBase64File()
         {
             //ServiceConfiguration["BingMapsKey"].ToString();
@@ -118,6 +122,10 @@ namespace K2Field.SmartObjects.Services.HttpUtils
             DownloadedFile File = null;
             try
             {
+                if (!string.IsNullOrWhiteSpace(ServiceConfiguration["BaseUrl"].ToString()) && !this.Url.StartsWith(ServiceConfiguration["BaseUrl"].ToString()))
+                {
+                    this.Url = ServiceConfiguration["BaseUrl"].ToString() + this.Url;
+                }
                 File = DownloadFile(this.Url);
             }
             catch (Exception ex)
@@ -231,6 +239,11 @@ namespace K2Field.SmartObjects.Services.HttpUtils
         private HttpWebRequest GetHttpWebRequest(string Method)
         {
             HttpWebRequest request = null;
+            if (!string.IsNullOrWhiteSpace(ServiceConfiguration["BaseUrl"].ToString()) && !this.Url.StartsWith(ServiceConfiguration["BaseUrl"].ToString()))
+            {
+                this.Url = ServiceConfiguration["BaseUrl"].ToString() + this.Url;
+            }
+ 
             request = (HttpWebRequest)WebRequest.Create(this.Url);
             request.Method = Method;
 
