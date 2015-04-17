@@ -27,7 +27,8 @@ namespace K2Field.SmartObjects.Services.HttpUtils
         [Attributes.Property("InputFileName", SoType.Text, "Input File Name", "Input File Name")]
         public string InputFileName { get; set; }
 
-
+        [Attributes.Property("SharePointSite", SoType.Text, "SharePoint Site", "SharePoint Site")]
+        public string SharePointSite { get; set; }
 
         [Attributes.Property("FileBase64", SoType.Memo, "File Base64", "File Base64")]
         public string FileBase64 { get; set; }
@@ -70,7 +71,7 @@ namespace K2Field.SmartObjects.Services.HttpUtils
             DownloadedFile File = null;
             try
             {
-                if (!string.IsNullOrWhiteSpace(ServiceConfiguration["BaseUrl"].ToString()) && !this.Url.StartsWith(ServiceConfiguration["BaseUrl"].ToString()))
+                if (ServiceConfiguration["BaseUrl"] != null && !string.IsNullOrWhiteSpace(ServiceConfiguration["BaseUrl"].ToString()) && !this.Url.StartsWith(ServiceConfiguration["BaseUrl"].ToString()))
                 {
                     this.Url = ServiceConfiguration["BaseUrl"].ToString() + this.Url;
                 }
@@ -122,7 +123,7 @@ namespace K2Field.SmartObjects.Services.HttpUtils
             DownloadedFile File = null;
             try
             {
-                if (!string.IsNullOrWhiteSpace(ServiceConfiguration["BaseUrl"].ToString()) && !this.Url.StartsWith(ServiceConfiguration["BaseUrl"].ToString()))
+                if (ServiceConfiguration["BaseUrl"] != null && !string.IsNullOrWhiteSpace(ServiceConfiguration["BaseUrl"].ToString()) && !this.Url.StartsWith(ServiceConfiguration["BaseUrl"].ToString()))
                 {
                     this.Url = ServiceConfiguration["BaseUrl"].ToString() + this.Url;
                 }
@@ -138,6 +139,51 @@ namespace K2Field.SmartObjects.Services.HttpUtils
             MapFile(File);
 
             return this;
+        }
+
+
+
+        /*
+         * url: "<app web url>/_api/SP.AppContextSite(@target)/web
+    /getfilebyserverrelativeurl('/Shared Documents/filename.docx')/$value
+    ?@target='<host web url>'",
+  method: "GET",
+  binaryStringResponseBody: true,
+         * */
+
+        [Attributes.Method("DownloadOffice365File", SourceCode.SmartObjects.Services.ServiceSDK.Types.MethodType.Read, "Download Office 365 File", "Download Office 365 File",
+        new string[] { "Url", "SharePointSite" }, //required property array (no required properties for this sample)
+        new string[] { "Url", "SharePointSite" }, //input property array (no optional input properties for this sample)
+        new string[] { "Url", "File", "FileSize", "FileSizeFormatted", "FileExtension", "FileContentType", "ResultStatus", "ResultMessage" })]
+        public HttpUtils DownloadOffice365File()
+        {
+            //ServiceConfiguration["BingMapsKey"].ToString();
+
+            DownloadedFile File = null;
+            try
+            {
+                if (ServiceConfiguration["BaseUrl"] != null && !string.IsNullOrWhiteSpace(ServiceConfiguration["BaseUrl"].ToString()) && !this.Url.StartsWith(ServiceConfiguration["BaseUrl"].ToString()))
+                {
+                    this.Url = ServiceConfiguration["BaseUrl"].ToString() + this.Url;
+                }
+                File = DownloadFile(this.Url);
+            }
+            catch (Exception ex)
+            {
+                this.ResultStatus = "Error";
+                this.ResultMessage = ex.Message;
+                return this;
+            }
+
+            MapFile(File);
+
+            return this;
+        }
+
+        private string GetOffice365DownloadUrl()
+        {
+            string url = this.Url;
+            this spurl = this.SharePointSite "/web/getfilebyserverrelativeurl('"+this.Url.Replace(this.SharePointSite, "")+"')/$value";
         }
 
 
@@ -239,7 +285,7 @@ namespace K2Field.SmartObjects.Services.HttpUtils
         private HttpWebRequest GetHttpWebRequest(string Method)
         {
             HttpWebRequest request = null;
-            if (!string.IsNullOrWhiteSpace(ServiceConfiguration["BaseUrl"].ToString()) && !this.Url.StartsWith(ServiceConfiguration["BaseUrl"].ToString()))
+            if (ServiceConfiguration["BaseUrl"] != null && !string.IsNullOrWhiteSpace(ServiceConfiguration["BaseUrl"].ToString()) && !this.Url.StartsWith(ServiceConfiguration["BaseUrl"].ToString()))
             {
                 this.Url = ServiceConfiguration["BaseUrl"].ToString() + this.Url;
             }
