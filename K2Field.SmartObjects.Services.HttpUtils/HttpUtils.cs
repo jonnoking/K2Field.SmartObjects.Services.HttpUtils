@@ -180,11 +180,11 @@ namespace K2Field.SmartObjects.Services.HttpUtils
             return this;
         }
 
-        private string GetOffice365DownloadUrl()
-        {
-            string url = this.Url;
-            this spurl = this.SharePointSite "/web/getfilebyserverrelativeurl('"+this.Url.Replace(this.SharePointSite, "")+"')/$value";
-        }
+        //private string GetOffice365DownloadUrl()
+        //{
+        //    string url = this.Url;
+        //    this spurl = this.SharePointSite "/web/getfilebyserverrelativeurl('"+this.Url.Replace(this.SharePointSite, "")+"')/$value";
+        //}
 
 
         private void MapFile(DownloadedFile File)
